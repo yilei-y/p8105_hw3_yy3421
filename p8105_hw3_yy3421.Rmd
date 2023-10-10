@@ -8,13 +8,27 @@ Loading dataset:
 
 ```{r}
 library(tidyverse)
+library(ggridges)
+library(patchwork)
 knitr::opts_chunk$set(
-  fig.width = 6,
-  fig.asp = .6,
-  out.width = "95%"
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
 )
 library(p8105.datasets)
 data("instacart")
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ### Question 1:
@@ -40,13 +54,14 @@ n_item_max |>
   filter(
     n_item > 10000
   ) |> 
-  ggplot(aes(y= reorder(aisle, +n_item), x = n_item))+
-  geom_bar(stat = "Identity") +
+  ggplot(aes(x= reorder(aisle, +n_item), y = n_item))+
+  geom_point() +
   labs(
     y = "Aisle",
     x = "Number of Items",
     caption = "Number of Items for Each Aisle with More than 10,000 Items"
-  )
+  )+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
 ### Question 3:
@@ -165,5 +180,41 @@ brfss_smart2010 |>
   )
 ```
 
+
+## Problem 3
+
+Cleaning and merging the two csv:
+
+```{r}
+nhanes_accel = 
+  read_csv("data/nhanes_accel.csv")
+
+nhanes_covar = 
+  read_csv("data/nhanes_covar.csv", skip = 4)
+
+nhanes_df = 
+  left_join(nhanes_covar, nhanes_accel, by = join_by(SEQN)) |> 
+  janitor::clean_names()|> 
+  filter(
+    age>=21,
+    is.na(bmi) == FALSE,
+    is.na(education) == FALSE
+  ) |> 
+   mutate(
+    sex = 
+      case_match(
+        sex,
+        1 ~ "male",
+        2 ~ "female"),
+    sex = as.factor(sex),
+    education =
+      case_match(
+        education,
+        1 ~ "less than high school",
+        2 ~ "high school equivalent",
+        3 ~ "more than high school"),
+    education = factor(education, levels = c("less than high school", "high school equivalent", "more than high school"))
+   )
+```
 
 
