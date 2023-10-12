@@ -211,8 +211,8 @@ nhanes_accel =
   janitor::clean_names() |> 
   pivot_longer(
     min1:min1440,
-    names_to = "Number of Time",
-    values_to = "Activity Time",
+    names_to = "number_of_time",
+    values_to = "activity_time",
     names_prefix = "min"
   )
 
@@ -265,7 +265,8 @@ nhanes_covar |>
     x = "Age",
     y = "Distribution",
     caption = "Age Distribution of Men and Women in Each Education Category"
-  )
+  )+
+  theme_minimal()
 ```
 
 
@@ -273,7 +274,19 @@ nhanes_covar |>
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
 
 ```{r}
-
+nhanes_df |> 
+  group_by(seqn, sex, age, education) |> 
+  summarize(total_activity = sum(activity_time)) |> 
+  ggplot(aes(x = age, y = total_activity))+
+  geom_point()+
+  geom_smooth(se = FALSE)+
+  facet_grid(.~ education)+
+  labs(
+    x = "Age",
+    y = "Total Activity over the Day",
+    caption = "Total Activities Versus Age of Men and Women for Each Education Level"
+  )
+  
 ```
 
 ### Question 3:
