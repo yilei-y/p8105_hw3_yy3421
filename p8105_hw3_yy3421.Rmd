@@ -208,7 +208,13 @@ Cleaning and merging the two csv:
 ```{r}
 nhanes_accel = 
   read_csv("data/nhanes_accel.csv") |> 
-  janitor::clean_names() 
+  janitor::clean_names() |> 
+  pivot_longer(
+    min1:min1440,
+    names_to = "Number of Time",
+    values_to = "Activity Time",
+    names_prefix = "min"
+  )
 
 
 nhanes_covar = 
@@ -232,10 +238,10 @@ nhanes_covar =
         1 ~ "less than high school",
         2 ~ "high school equivalent",
         3 ~ "more than high school"),
-    education = factor(education, levels = c("less than high school", "high school equivalent", "more than high school")))
+    education = as.factor(education))
 
 nhanes_df = 
-  left_join(nhanes_covar, nhanes_accel, by = join_by(seqn))
+  left_join(nhanes_covar, nhanes_accel, by = "seqn")
 ```
 
 ### Question 1: 
@@ -251,16 +257,15 @@ nhanes_covar |>
 
 Visualization of Age Distribution:
 ```{r}
-nhanes_df |> 
-  group_by(education) |> 
-  ggplot(
-    aes(
-      y = age,
-      color = sex
-    )
-  )+
-  geom_boxplot()+
-  facet_grid(~ education)
+nhanes_covar |> 
+  ggplot(aes(x = age, fill = sex))+
+  geom_density(alpha=.5)+
+  facet_grid(.~ education)+
+  labs(
+    x = "Age",
+    y = "Distribution",
+    caption = "Age Distribution of Men and Women in Each Education Category"
+  )
 ```
 
 
