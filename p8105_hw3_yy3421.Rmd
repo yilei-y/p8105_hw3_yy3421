@@ -112,12 +112,13 @@ data("brfss_smart2010")
 brfss_smart2010 = 
   brfss_smart2010 |> 
   janitor::clean_names() |> 
+  rename(state = locationabbr, county = locationdesc) |> 
   filter(
     topic == "Overall Health",
     response == "Excellent"|response == "Very good"|response == "Good"|response == "Fair"|response == "Poor"
   ) |> 
   mutate(
-    response = factor(response, levels = c("Excellent", "Very good", "Good", "Fair", "Poor"))
+    response = ordered(response, levels = c("Excellent", "Very good", "Good", "Fair", "Poor"))
   ) |> 
   arrange(desc(response))
 ```
@@ -126,28 +127,47 @@ brfss_smart2010 =
 
 
 ```{r}
+brfss_smart2002_state = 
+  brfss_smart2010 |> 
+  filter(
+    year == 2002
+  ) |> 
+  group_by(state) |> 
+  summarize(n_location = n_distinct(county)) |> 
+  filter(
+    n_location >= 7
+  )
+
 brfss_smart2010_state = 
   brfss_smart2010 |> 
-  group_by(locationabbr, locationdesc) |> 
-  tally()
+  filter(
+    year == 2010
+  ) |> 
+  group_by(state) |> 
+  summarize(n_location = n_distinct(county)) |> 
+  filter(
+    n_location >= 7)
 ```
 
-## Question 2:
+There are `r nrow(brfss_smart2002_state)` locations in 2002, which are CT, FL, MA, NC, NJ, PA.
+There are `r nrow(brfss_smart2010_state)` locations in 2010, which are CA, CO, FL, MA, MD, NC, NE, NJ, NY, OH, PA, SC, TX, WA.
+
+### Question 2:
 
 ```{r}
 brfss_smart2010 |> 
   filter(
     response == "Excellent"
   ) |> 
-  select(year, locationabbr, data_value
+  select(year, state, data_value
   ) |> 
-  group_by(locationabbr, year) |> 
+  group_by(state, year) |> 
   summarize(avg_data_value = mean(data_value, na.rm = TRUE)) |>
   ggplot(aes(
     x = year, 
     y = avg_data_value, 
-    color = locationabbr,
-    group = locationabbr))+
+    color = state,
+    group = state))+
   geom_point()+
   geom_line()+
   labs(
@@ -158,12 +178,12 @@ brfss_smart2010 |>
 ```
 
 
-## Question 3:
+### Question 3:
 
 ```{r}
 brfss_smart2010 |> 
   filter(
-    locationabbr == "NY",
+    state == "NY",
     year == 2006 | year == 2010
   ) |> 
   ggplot(
@@ -187,14 +207,13 @@ Cleaning and merging the two csv:
 
 ```{r}
 nhanes_accel = 
-  read_csv("data/nhanes_accel.csv")
+  read_csv("data/nhanes_accel.csv") |> 
+  janitor::clean_names() 
+
 
 nhanes_covar = 
-  read_csv("data/nhanes_covar.csv", skip = 4)
-
-nhanes_df = 
-  left_join(nhanes_covar, nhanes_accel, by = join_by(SEQN)) |> 
-  janitor::clean_names()|> 
+  read_csv("data/nhanes_covar.csv", skip = 4) |> 
+  janitor::clean_names() |> 
   filter(
     age>=21,
     is.na(bmi) == FALSE,
@@ -213,8 +232,46 @@ nhanes_df =
         1 ~ "less than high school",
         2 ~ "high school equivalent",
         3 ~ "more than high school"),
-    education = factor(education, levels = c("less than high school", "high school equivalent", "more than high school"))
-   )
+    education = factor(education, levels = c("less than high school", "high school equivalent", "more than high school")))
+
+nhanes_df = 
+  left_join(nhanes_covar, nhanes_accel, by = join_by(seqn))
 ```
+
+### Question 1: 
+Produce a reader-friendly table for the number of men and women in each education category, and create a visualization of the age distributions for men and women in each education category. 
+
+Table:
+```{r}
+nhanes_covar |> 
+  select(education, sex) |> 
+  table()
+
+```
+
+Visualization of Age Distribution:
+```{r}
+nhanes_df |> 
+  group_by(education) |> 
+  ggplot(
+    aes(
+      y = age,
+      color = sex
+    )
+  )+
+  geom_boxplot()+
+  facet_grid(~ education)
+```
+
+
+### Question 2:
+Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
+
+```{r}
+
+```
+
+### Question 3:
+Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.
 
 
