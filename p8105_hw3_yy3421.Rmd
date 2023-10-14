@@ -46,7 +46,7 @@ n_item_max = instacart_aisle |>
   arrange(desc(n_item))
 ```
 
-There are `r instacart_aisle |> summarize() |> nrow()` aisles. The most items are ordered from aisle "`r n_item_max$aisle[1]`" with `r n_item_max$n_item[1]` items.
+There are **`r instacart_aisle |> summarize() |> nrow()`** aisles. The most items are ordered from aisle **"`r n_item_max$aisle[1]`"** with `r n_item_max$n_item[1]` items.
 
 ### Question 2:
 ```{r}
@@ -235,6 +235,9 @@ nhanes_accel =
     names_to = "number_of_time",
     values_to = "activity_time",
     names_prefix = "min"
+  ) |> 
+  mutate(
+    number_of_time = as.numeric(number_of_time)
   )
 
 
@@ -262,10 +265,7 @@ nhanes_covar =
     education = as.factor(education))
 
 nhanes_df = 
-  left_join(nhanes_covar, nhanes_accel, by = "seqn") |> 
-  mutate(
-    number_of_time = as.numeric(number_of_time)
-  )
+  left_join(nhanes_covar, nhanes_accel, by = "seqn") 
 ```
 
 ### Question 1: 
