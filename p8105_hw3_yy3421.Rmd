@@ -63,6 +63,7 @@ n_item_max |>
   )+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
+This point plot shows the number of items ordered in each aisle in an ascending order.
 
 ### Question 3:
 ```{r}
@@ -79,6 +80,8 @@ instacart_aisle |>
   filter(product_rank < 4) 
 
 ```
+
+The above table table shows the three most popular items in aisles `baking ingredients`, `dog food care`, and `packaged vegetables fruits`, and  the number of times each item is ordered.
 
 ### Question 4:
 ```{r}
@@ -98,6 +101,7 @@ instacart |>
     values_from = mean_hour
   )
 ```
+The last table shows the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on every single day of the week. Pink Lady Apples are generally purchased slightly earlier in the day than Coffee Ice Cream, with the exception of day 5.
 
 ## Problem 2
 
@@ -277,7 +281,7 @@ Traditional analyses of accelerometer data focus on the total activity over the 
 nhanes_df |> 
   group_by(seqn, sex, age, education) |> 
   summarize(total_activity = sum(activity_time)) |> 
-  ggplot(aes(x = age, y = total_activity))+
+  ggplot(aes(x = age, y = total_activity, color = sex))+
   geom_point()+
   geom_smooth(se = FALSE)+
   facet_grid(.~ education)+
