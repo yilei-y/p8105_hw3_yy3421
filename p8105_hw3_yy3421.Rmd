@@ -312,6 +312,8 @@ nhanes_df |>
   )
 ```
 
+The three-panel plot above shows the total activity level over the day versus age for each education level. In each education level, the data is grouped and color-coded based on sex. Based on the trend lines in each panel, we can observe a common pattern of an overall decreasing trend in all three education levels as age increases. Furthermore, female has a higher total activity value compared to male in the education levels of `high school equivalent` and `more than high school`.
+
 ### Question 3:
 Accelerometer data allows the inspection activity over the course of the day. Make a three-panel plot that shows the 24-hour activity time courses for each education level and use color to indicate sex. Describe in words any patterns or conclusions you can make based on this graph; including smooth trends may help identify differences.
 
