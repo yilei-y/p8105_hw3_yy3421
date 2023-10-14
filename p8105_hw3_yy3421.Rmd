@@ -262,7 +262,10 @@ nhanes_covar =
     education = as.factor(education))
 
 nhanes_df = 
-  left_join(nhanes_covar, nhanes_accel, by = "seqn")
+  left_join(nhanes_covar, nhanes_accel, by = "seqn") |> 
+  mutate(
+    number_of_time = as.numeric(number_of_time)
+  )
 ```
 
 ### Question 1: 
@@ -327,7 +330,10 @@ nhanes_df |>
     x = "Number of Time",
     y = "Activity Time",
     caption = "24-Hour Activity Time Courses for Each Educaiton Level"
-  )
+  )+
+  scale_x_continuous(
+    breaks = c(1, 300, 600, 900, 1200, 1500), 
+    labels = c("1", "300", "600", "900", "1200", "1500"))
 ```
 
-In each education level, the above plot shows the 24-hour activity time changes for each participant and is color-coded based on sex. The trend of each participant in every minute in a day is presented in this plot. Overall, the trend line of change in 24 hours is similar in each education level for each sex is similar with a minimum near the middle of day.
+In each education level, the above plot shows the 24-hour activity time changes for each participant and is color-coded based on sex. The trend of each participant in every minute in a day is presented in this plot. Overall, the trend line of change in 24 hours is similar in each education level for each sex is similar with a minimum near the start of the day, a increase starting near 300 mins, a peak near 600 mins, and a gradual decrease afterwards.
