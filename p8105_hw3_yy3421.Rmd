@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 library(p8105.datasets)
 data("instacart")
 
-theme_set(theme_minimal() + theme(legend.position = "bottom"))
+theme_set(theme_minimal() + theme(legend.position = "right"))
 
 options(
   ggplot2.continuous.colour = "viridis",
@@ -63,6 +63,7 @@ n_item_max |>
   )+
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
+
 This point plot shows the number of items ordered in each aisle in an ascending order.
 
 ### Question 3:
@@ -77,7 +78,8 @@ instacart_aisle |>
   mutate(
     product_rank = min_rank(desc(n_product))
     ) |> 
-  filter(product_rank < 4) 
+  filter(product_rank < 4) |> 
+  knitr::kable()
 
 ```
 
@@ -99,8 +101,10 @@ instacart |>
   pivot_wider(
     names_from = product_name,
     values_from = mean_hour
-  )
+  ) |> 
+  knitr::kable(digits = 2)
 ```
+
 The last table shows the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on every single day of the week. Pink Lady Apples are generally purchased slightly earlier in the day than Coffee Ice Cream, with the exception of day 5.
 
 ## Problem 2
@@ -112,6 +116,7 @@ library(p8105.datasets)
 data("brfss_smart2010")
 ```
 
+Data cleaning:
 ```{r}
 brfss_smart2010 = 
   brfss_smart2010 |> 
@@ -142,6 +147,8 @@ brfss_smart2002_state =
     n_location >= 7
   )
 
+str(brfss_smart2002_state)
+
 brfss_smart2010_state = 
   brfss_smart2010 |> 
   filter(
@@ -151,22 +158,28 @@ brfss_smart2010_state =
   summarize(n_location = n_distinct(county)) |> 
   filter(
     n_location >= 7)
+
+str(brfss_smart2010_state)
 ```
 
 There are `r nrow(brfss_smart2002_state)` locations in 2002, which are CT, FL, MA, NC, NJ, PA.
+
 There are `r nrow(brfss_smart2010_state)` locations in 2010, which are CA, CO, FL, MA, MD, NC, NE, NJ, NY, OH, PA, SC, TX, WA.
 
 ### Question 2:
 
 ```{r}
-brfss_smart2010 |> 
+brfss_excellent_avg =
+  brfss_smart2010 |> 
   filter(
     response == "Excellent"
   ) |> 
   select(year, state, data_value
   ) |> 
   group_by(state, year) |> 
-  summarize(avg_data_value = mean(data_value, na.rm = TRUE)) |>
+  summarize(avg_data_value = mean(data_value, na.rm = TRUE)) 
+
+brfss_excellent_avg |> 
   ggplot(aes(
     x = year, 
     y = avg_data_value, 
@@ -181,6 +194,9 @@ brfss_smart2010 |>
   )
 ```
 
+The `brfss_excellent_avg` data set contains only the information on the state with `Excellent` responses. In this data set, the three variables are `state`, `year`, and `avg_data_value`. Based on these three variables, this dataset contains information on the average data values of each state with `Excellent` reponse every year.
+
+The plot above shows the change in average data values of each state, only with Excellent responses, per year during the time period of 2002 to 2010. We can observe that each state has an obvious change in average data value per year.
 
 ### Question 3:
 
@@ -204,6 +220,7 @@ brfss_smart2010 |>
   )
 ```
 
+The above two-panel plot compare the data value between year 2006 and 2010. In each year, the data value is further grouped based on the response, `Excellent`, `Very good`, `Good`, `Fair`, and `Poor`. Based on this plot, in 2006, responses `Very good` and `Good` have the highest data values while response `Very good` has the highest data values in 2010. However, both years have `Poor` as the lowest data value response.
 
 ## Problem 3
 
@@ -254,10 +271,13 @@ Produce a reader-friendly table for the number of men and women in each educatio
 Table:
 ```{r}
 nhanes_covar |> 
-  select(education, sex) |> 
-  table()
+  group_by(education, sex) |> 
+  summarise(number =n()) |> 
+  knitr::kable()
 
 ```
+
+The table above shows the number of people in each educaiton and sex category. Based on this table, most of female and male have an education level of `more than high school`.
 
 Visualization of Age Distribution:
 ```{r}
@@ -269,10 +289,10 @@ nhanes_covar |>
     x = "Age",
     y = "Distribution",
     caption = "Age Distribution of Men and Women in Each Education Category"
-  )+
-  theme_minimal()
+  )
 ```
 
+The three-panel density plot above presents the age distribution for men and women in each education category. In education levels `high school equivalent` and `less than high school`, female has a left-skewed and comparatively unimodal distribution. In these two education levels, male has a bimodel distribution and comparatively left-skewed distribution for `less than high school`. For `more than high school`, both sex categories have a right-skewed distribution.
 
 ### Question 2:
 Traditional analyses of accelerometer data focus on the total activity over the day. Using your tidied dataset, aggregate across minutes to create a total activity variable for each participant. Plot these total activities (y-axis) against age (x-axis); your plot should compare men to women and have separate panels for each education level. Include a trend line or a smooth to illustrate differences. Comment on your plot.
@@ -289,8 +309,7 @@ nhanes_df |>
     x = "Age",
     y = "Total Activity over the Day",
     caption = "Total Activities Versus Age of Men and Women for Each Education Level"
-  )+
-  theme_minimal()
+  )
 ```
 
 ### Question 3:
@@ -306,7 +325,6 @@ nhanes_df |>
     x = "Number of Time",
     y = "Activity Time",
     caption = "24-Hour Activity Time Courses for Each Educaiton Level"
-  )+
-  theme_minimal()
+  )
 ```
 
